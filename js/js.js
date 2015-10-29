@@ -11,13 +11,13 @@
         stokeWidth = 2,
         stokeLinecap = "round",
         opacityDefault = 0;
+    
     var color = d3.scale.ordinal()
             .range(function(d) {
                 return d.color;
             });
 
     var arc = d3.svg.arc()
-    //.startAngle(0)
             .innerRadius(0)
             .outerRadius(radius - 10)
             .innerRadius(radius - 40);
@@ -34,20 +34,26 @@
             .append("g")
             .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
-    var listItem = d3.select(".pie-1").append("ul").attr("class", "list");
+    var text = svg.append("g")
+            .attr("class", "pie-text")
+            .attr("transform", function(d) {
+                console.log(arc.centroid.radius);
+                //return "translate(" + arc.centroid(d) + ")";
+            });
+
+    text.append("text")
+        .attr("class", "pie-name")
+        .attr("text-anchor", "middle");
+
+    text.append("text")
+        .attr("class", "pie-percent")
+        .attr("text-anchor", "middle");
 
     d3.csv("data.csv", function(error, data) {
         data.forEach(function(d) {
             dColor = d.color;
             dPercent = +d.percent;
             dName = d.name;
-
-            listItem.append("li")
-                .append("span")
-                .attr("class", "color")
-                .attr("style", "background-color:" + dColor + ";");
-            listItem.append("span")
-                .attr("class", "class");
             return dColor, dPercent, dName;
         });
 
@@ -56,6 +62,15 @@
                 .enter()
                 .append("g")
                 .attr("class", "arc");
+
+        console.log(data[0].percent);
+        console.log(data[0].name);
+
+        svg.select(".pie-name")
+            .text(data[0].name);
+
+        svg.select(".pie-percent")
+            .text(data[0].percent);
 
         g.append("path")
             .attr("d", arc)
@@ -82,7 +97,7 @@
             }).duration(600)
             .attrTween('d', function(d) {
                 
-                var i = d3.interpolate(d.startAngle+0.1, d.endAngle);
+                var i = d3.interpolate(d.startAngle+0, d.endAngle);
                 var item = this;
 
                 return function(t) {
@@ -92,18 +107,17 @@
                     return arc(d);
                 };
             });
-        
-
-        function arcTween(a) {
-            console.log(this);
-            var i = d3.interpolate(this._current, a);
-            this._current = i(0);
-
-            return function(t) {
-                return arc(i(t));
-            };
-        };
     });
+
+    function arcTween(a) {
+        console.log(this);
+        var i = d3.interpolate(this._current, a);
+        this._current = i(0);
+
+        return function(t) {
+            return arc(i(t));
+        };
+    };
 }();
 
 
